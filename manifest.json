@@ -2,8 +2,14 @@
   "manifest_version": 3,
   "name": "Hide Chatbot & Chat Bubbles",
   "short_name": "Hide Chat Bubbles",
-  "version": "0.1.0",
+  "version": "0.1.1.1",
   "description": "Hide annoying lower-right chatbot, chat bot, and support chat bubbles across websites.",
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "permissions": ["storage", "activeTab"],
   "host_permissions": ["<all_urls>"],
   "action": {
@@ -17,7 +23,9 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
     }
   ]
 }

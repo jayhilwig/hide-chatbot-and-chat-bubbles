@@ -27,12 +27,21 @@ async function getTabState(tabId) {
   });
 }
 
+function setStatus(message, hasCheck = false) {
+  const status = document.getElementById("status");
+
+  if (hasCheck) {
+    status.innerHTML = `<span style="color:#d93025;font-weight:800;margin-right:6px;">✓</span>${message}`;
+  } else {
+    status.textContent = message;
+  }
+}
+
 async function refresh() {
   const tab = await getCurrentTab();
   const siteText = document.getElementById("siteText");
   const siteToggle = document.getElementById("siteToggle");
   const globalToggle = document.getElementById("globalToggle");
-  const status = document.getElementById("status");
 
   if (!tab) {
     siteText.textContent = "Unavailable on this page.";
@@ -51,13 +60,13 @@ async function refresh() {
   globalToggle.checked = !globalDisabled;
 
   if (globalDisabled) {
-    status.textContent = "Disabled everywhere.";
+    setStatus("Disabled everywhere.");
   } else if (siteDisabled) {
-    status.textContent = "Disabled on this site.";
+    setStatus("Disabled on this site.");
   } else if (tabState?.count > 0) {
-    status.textContent = "Chat bubble found and hidden on this site.";
+    setStatus("Chat bubble found and hidden on this site.", true);
   } else {
-    status.textContent = "No lower-right chat bubble found on this site.";
+    setStatus("No chat bubble found on this site.");
   }
 }
 
