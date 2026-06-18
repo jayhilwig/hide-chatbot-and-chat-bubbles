@@ -65,8 +65,8 @@ content.js
 manifest.json
 popup.html
 popup.js
-icons/
-  icon16.png
-  icon32.png
-  icon48.png
-  icon128.png
+
+icon16.png
+icon32.png
+icon48.png
+icon128.png
