@@ -2,7 +2,7 @@
 
 A simple Chrome extension that hides annoying lower-right chatbot, chat bot, and support chat bubbles across websites.
 
-The goal is not to block ads, cookie banners, page content, or full chat apps. It only targets floating chat/support widgets that usually sit in the lower-right corner of a webpage.
+The goal is not to block ads, cookie banners, newsletter modals, feedback tabs, QR prompts, form controls, checkout flows, or full chat apps. It only targets floating chat/support widgets that usually sit in the lower-right corner of a webpage.
 
 ## What it does
 
@@ -13,6 +13,15 @@ The goal is not to block ads, cookie banners, page content, or full chat apps. I
 - Lets you disable blocking everywhere
 - Stores preferences using Chrome storage
 - Requires no account
+
+## What it does not do
+
+- Does not block ads
+- Does not block cookie consent popups
+- Does not block newsletter or marketing modals
+- Does not block feedback tabs or surveys
+- Does not block QR-code prompts or app-download prompts
+- Does not block normal forms, checkout flows, or page content
 
 ## Why this exists
 
@@ -70,3 +79,4 @@ icon16.png
 icon32.png
 icon48.png
 icon128.png
+```
