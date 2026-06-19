@@ -3,8 +3,33 @@
   const STYLE_ID = "hcbb-force-hide-style";
   const ORIGINAL_PREFIX = "data-hcbb-original-";
 
+  const NEVER_BLOCK_HOSTS = [
+    "chatgpt.com",
+    "chat.openai.com",
+    "claude.ai",
+    "gemini.google.com",
+    "copilot.microsoft.com",
+    "perplexity.ai",
+    "poe.com",
+    "messenger.com",
+    "web.whatsapp.com",
+    "discord.com",
+    "slack.com",
+  ];
+
   let scanTimer = null;
   let pageHadBubble = false;
+
+  const currentHost = window.location.hostname.replace(/^www\./, "");
+
+  if (
+    NEVER_BLOCK_HOSTS.some(
+      (host) => currentHost === host || currentHost.endsWith(`.${host}`),
+    )
+  ) {
+    console.log("[Hide Chatbot] Skipping full chat app:", currentHost);
+    return;
+  }
 
   const trustedProviderSelectors = [
     // Qualified / NinjaOne-style messenger launchers
@@ -757,24 +782,40 @@
 
     const observer = new MutationObserver(scheduleScan);
 
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: [
-        "class",
-        "style",
-        "id",
-        "aria-label",
-        "title",
-        "src",
-        "data-testid",
-        "data-test",
-        "data-qa",
-        "data-backend-id",
-        "data-backend-test-id",
-      ],
-    });
+    function startObserver() {
+      const target = document.documentElement || document.body;
+
+      if (!target || !(target instanceof Node)) {
+        return;
+      }
+
+      observer.observe(target, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: [
+          "class",
+          "style",
+          "id",
+          "aria-label",
+          "title",
+          "src",
+          "data-testid",
+          "data-test",
+          "data-qa",
+          "data-backend-id",
+          "data-backend-test-id",
+        ],
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", startObserver, {
+        once: true,
+      });
+    } else {
+      startObserver();
+    }
 
     window.addEventListener("resize", scheduleScan);
 
