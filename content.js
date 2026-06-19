@@ -21,6 +21,22 @@
     'button[aria-label*="open messenger" i]',
     '[style*="--launcherButtonBackgroundColor"]',
     '[style*="--launcherImageUrl"]',
+
+    // Joinchat
+    ".joinchat",
+    ".joinchat__button",
+    '[class*="joinchat" i]',
+
+    // LivePerson / LiveEngage
+    '[id^="LPMcontainer-"]',
+    ".LPMcontainer",
+    ".LPMoverlay",
+    '[class*="LPMcontainer" i]',
+
+    // Front Chat
+    "#ch-shadow-root-wrapper",
+    '[class*="ch-front" i]',
+    '[class*="LauncherButtonWrapper-ch-front" i]',
   ];
 
   const providerSelectors = [
@@ -57,6 +73,13 @@
     '[id*="hubspot-messages" i]',
     'iframe[src*="hubspot" i]',
 
+    // Delphi
+    "#delphi-bubble-wrapper",
+    "#delphi-bubble-container",
+    "#delphi-root-encapsulation",
+    '[id*="delphi" i]',
+    '[class*="delphi-injected" i]',
+
     // Gorgias
     'iframe#chat-button[title*="gorgias" i]',
     'iframe#chat-campaigns[title*="gorgias" i]',
@@ -75,6 +98,30 @@
     'iframe[id*="zsiq" i]',
     'iframe[src*="salesiq" i]',
     'iframe[src*="zohosalesiq" i]',
+
+    // Lifelink chatbot
+    "#lifelink-chatbot-container",
+    '[id*="lifelink-chatbot" i]',
+    '[class*="icon-only-chatbot-frame" i]',
+
+    // UJET
+    "#widget-launcher.ujet-launcher",
+    ".ujet-launcher",
+    '[class*="ujet" i]',
+
+    // Vision Helpdesk
+    "#v4wid",
+    ".vh-chatbot-container",
+    ".vh-chatbot-icons",
+    '[class*="vh-chatbot" i]',
+
+    // Grace / Healthcare Smart Assistant
+    "#healthcare-chatbot-fab-v2",
+    "#healthcare-chatbot-fab-v2-btn",
+    "#healthcare-chatbot",
+    "#message-bubble-div-v2",
+    "#message-bubble-fas-toast-container",
+    '[class*="grace-" i]',
 
     // Common provider iframes
     'iframe[src*="freshchat" i]',
@@ -153,6 +200,9 @@
     "helpscout",
     "olark",
     "livechat",
+    "liveperson",
+    "liveengage",
+    "lpmcontainer",
     "messenger",
     "live chat",
     "support chat",
@@ -162,6 +212,8 @@
     "chat launcher",
     "open chat",
     "open messenger",
+    "ch-front",
+    "front chat",
   ];
 
   function getAllRoots(root = document) {
@@ -205,7 +257,11 @@
       [id*="qualified-offer-host"],
       #qualified-multimodal-host,
       .q-docked-skeleton,
-      [class*="q-docked-skeleton"] {
+      [class*="q-docked-skeleton"],
+      [id^="LPMcontainer-"],
+      .LPMcontainer,
+      .LPMoverlay,
+      [class*="LPMcontainer"] {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -342,7 +398,8 @@
       text.includes("crisp-chatbox") ||
       text.includes("tawk") ||
       text.includes("gorgias") ||
-      text.includes("qualified-multimodal-host")
+      text.includes("qualified-multimodal-host") ||
+      text.includes("lpmcontainer")
     );
   }
 
@@ -507,9 +564,20 @@
       return el;
     }
 
+    if (el.id && el.id.startsWith("LPMcontainer-")) {
+      return el;
+    }
+
     const qualifiedOfferHost = el.closest?.('[id^="_qualified-offer-host-"]');
     if (qualifiedOfferHost instanceof HTMLElement) {
       return qualifiedOfferHost;
+    }
+
+    const livePersonHost = el.closest?.(
+      '[id^="LPMcontainer-"], .LPMcontainer, .LPMoverlay',
+    );
+    if (livePersonHost instanceof HTMLElement) {
+      return livePersonHost;
     }
 
     let best = el;
@@ -545,13 +613,20 @@
     return best;
   }
 
-  function forceHideQualifiedShells() {
+  function forceHideKnownShells() {
     const selectors = [
+      // Qualified
       '[id^="_qualified-offer-host-"]',
       '[id*="qualified-offer-host"]',
       "#qualified-multimodal-host",
       ".q-docked-skeleton",
       '[class*="q-docked-skeleton"]',
+
+      // LivePerson / LiveEngage
+      '[id^="LPMcontainer-"]',
+      ".LPMcontainer",
+      ".LPMoverlay",
+      '[class*="LPMcontainer" i]',
     ];
 
     let found = false;
@@ -568,15 +643,6 @@
             el.style.setProperty("visibility", "hidden", "important");
             el.style.setProperty("opacity", "0", "important");
             el.style.setProperty("pointer-events", "none", "important");
-
-            const host = root.host;
-            if (host instanceof HTMLElement && hasHint(host, providerHints)) {
-              host.setAttribute(EXT_ATTR, "true");
-              host.style.setProperty("display", "none", "important");
-              host.style.setProperty("visibility", "hidden", "important");
-              host.style.setProperty("opacity", "0", "important");
-              host.style.setProperty("pointer-events", "none", "important");
-            }
           });
         } catch {}
       }
@@ -640,13 +706,24 @@
   function scan() {
     injectForceHideCss();
 
-    const qualifiedShellFound = forceHideQualifiedShells();
+    const knownShellFound = forceHideKnownShells();
     const targets = collectMatches();
 
-    if (qualifiedShellFound || targets.size > 0) {
+    if (knownShellFound || targets.size > 0) {
       pageHadBubble = true;
       targets.forEach(hideElement);
     }
+
+    // If anything is already hidden by this extension,
+    // keep the icon/status active even if a later scan finds zero targets.
+    try {
+      for (const root of getAllRoots()) {
+        if (root.querySelector?.(`[${EXT_ATTR}="true"]`)) {
+          pageHadBubble = true;
+          break;
+        }
+      }
+    } catch {}
 
     sendState(true);
   }

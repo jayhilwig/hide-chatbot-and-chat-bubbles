@@ -9,19 +9,22 @@ function makeIcon(backgroundColor, letterColor = "#ffffff") {
 
   ctx.fillStyle = backgroundColor;
 
+  // Larger main speech bubble
   ctx.beginPath();
-  ctx.roundRect(1, 2, 30, 23, 5);
+  ctx.roundRect(1, 1, 30, 25, 6);
   ctx.fill();
 
+  // Larger tail, tucked into the canvas
   ctx.beginPath();
   ctx.moveTo(9, 24);
   ctx.lineTo(3, 31);
-  ctx.lineTo(17, 24);
+  ctx.lineTo(18, 25);
   ctx.closePath();
   ctx.fill();
 
+  // Slightly larger C
   ctx.fillStyle = letterColor;
-  ctx.font = "bold 21px Arial, sans-serif";
+  ctx.font = "bold 22px Arial, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("C", 16, 15);
@@ -37,14 +40,18 @@ const icons = {
 async function setTabIcon(tabId, state) {
   if (!tabId) return;
 
-  if (state === "active") {
-    await chrome.action.setIcon({ tabId, imageData: icons.active });
-    await chrome.action.setBadgeText({ tabId, text: "" });
-    return;
-  }
+  try {
+    if (state === "active") {
+      await chrome.action.setIcon({ tabId, imageData: icons.active });
+      await chrome.action.setBadgeText({ tabId, text: "" });
+      return;
+    }
 
-  await chrome.action.setIcon({ tabId, imageData: icons.idle });
-  await chrome.action.setBadgeText({ tabId, text: "" });
+    await chrome.action.setIcon({ tabId, imageData: icons.idle });
+    await chrome.action.setBadgeText({ tabId, text: "" });
+  } catch {
+    // Tab may have closed or navigated before the icon update completed.
+  }
 }
 
 function getStoredState(tabId) {
@@ -100,14 +107,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message?.type === "HCBB_BADGE_UPDATE") {
     const tabId = sender.tab?.id;
-    if (!tabId) return;
+    if (!tabId) return false;
 
     const incomingCount = Number(message.count || 0);
     const incomingEnabled = message.enabled !== false;
     const previous = getStoredState(tabId);
 
-    let nextState = "idle";
-    let nextCount = 0;
+    let nextState = previous.state;
+    let nextCount = previous.count;
 
     // Disabled/off means gray idle. No OFF badge.
     if (!incomingEnabled) {
@@ -128,6 +135,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       nextCount = 1;
     }
 
+    // No detection yet.
+    else {
+      nextState = "idle";
+      nextCount = 0;
+    }
+
     tabStates.set(tabId, {
       state: nextState,
       count: nextCount,
@@ -136,7 +149,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
 
     setTabIcon(tabId, nextState);
-    return;
+    return false;
   }
 
   if (message?.type === "HCBB_GET_TAB_STATE") {
@@ -144,6 +157,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse(getStoredState(tabId));
     return true;
   }
+
+  return false;
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
