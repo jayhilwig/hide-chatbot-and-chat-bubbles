@@ -64,6 +64,16 @@
     '[class*="LauncherButtonWrapper-ch-front" i]',
   ];
 
+  const cautiousGenericSelectors = [
+    // Generic chatbot wrappers. These only get hidden if the element also passes
+    // the floating lower-right bubble checks.
+    '.chatbot-container:has(> button.chatbot-button[aria-label*="chat" i])',
+    '.chatbot-container:has(.chatbot-window[role="dialog"][aria-label*="chat" i])',
+    '[class*="chatbot-launcher" i]',
+    '[class*="chat-widget-launcher" i]',
+    '[class*="chatbot-widget" i]',
+  ];
+
   const providerSelectors = [
     // Intercom / Fin
     "#intercom-container",
@@ -277,22 +287,26 @@
 
   function injectForceHideCss() {
     const css = `
-      [${EXT_ATTR}="true"],
-      [id^="_qualified-offer-host-"],
-      [id*="qualified-offer-host"],
-      #qualified-multimodal-host,
-      .q-docked-skeleton,
-      [class*="q-docked-skeleton"],
-      [id^="LPMcontainer-"],
-      .LPMcontainer,
-      .LPMoverlay,
-      [class*="LPMcontainer"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
-    `;
+    [${EXT_ATTR}="true"],
+    [id^="_qualified-offer-host-"],
+    [id*="qualified-offer-host"],
+    #qualified-multimodal-host,
+    .q-docked-skeleton,
+    [class*="q-docked-skeleton"],
+    [id^="LPMcontainer-"],
+    .LPMcontainer,
+    .LPMoverlay,
+    [class*="LPMcontainer"],
+    #inside_holder:has(#inside_tabs),
+    #va-container:has(#chatbotToronto),
+    #va-container:has(#botText),
+    .ManagerHeaderLinkContainer.ManagerHeaderLinkContainerAssistant {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  `;
 
     for (const root of getAllRoots()) {
       try {
@@ -440,6 +454,44 @@
     if (!isReasonableChatSize(rect)) return false;
 
     return isLikelyFloatingChatArea(rect) || hasHint(el, providerHints);
+  }
+
+  function shouldHideCautiousGenericMatch(el) {
+    if (!(el instanceof HTMLElement)) return false;
+    if (el.hasAttribute(EXT_ATTR)) return false;
+    if (!canHideBodyOrHtml(el)) return false;
+
+    const text = getElementText(el);
+    const hardExcludeHints = [
+      "cookie",
+      "consent",
+      "recaptcha",
+      "captcha",
+      "feedback",
+      "survey",
+      "qualtrics",
+      "qsi",
+      "qr",
+      "qr-code",
+      "qrcode",
+      "whatsapp",
+      "order in the app",
+      "scan",
+      "mobile app",
+      "get the app",
+      "download the app",
+      "google apps",
+      "app launcher",
+    ];
+
+    if (hardExcludeHints.some((hint) => text.includes(hint))) return false;
+
+    const rect = getRect(el);
+    if (!rect) return false;
+    if (!isVisibleEnough(el, rect)) return false;
+    if (!isReasonableChatSize(rect)) return false;
+
+    return isLikelyFloatingChatArea(rect);
   }
 
   function shouldHideStrongTextMatch(el) {
@@ -652,6 +704,14 @@
       ".LPMcontainer",
       ".LPMoverlay",
       '[class*="LPMcontainer" i]',
+
+      // HP support
+      "#inside_holder:has(#inside_tabs)",
+      "#va-container:has(#chatbotToronto)",
+      "#va-container:has(#botText)",
+
+      // DOL assistant shell
+      ".ManagerHeaderLinkContainer.ManagerHeaderLinkContainerAssistant",
     ];
 
     let found = false;
@@ -698,6 +758,17 @@
           root.querySelectorAll(selector).forEach((el) => {
             if (shouldHideProviderMatch(el)) {
               targets.add(findProviderAncestor(el));
+            }
+          });
+        } catch {}
+      }
+
+      // Cautious generic chatbot patterns still require geometry checks.
+      for (const selector of cautiousGenericSelectors) {
+        try {
+          root.querySelectorAll(selector).forEach((el) => {
+            if (shouldHideCautiousGenericMatch(el)) {
+              targets.add(el);
             }
           });
         } catch {}
