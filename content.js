@@ -86,6 +86,11 @@
     '[aria-label*="intercom messenger" i]',
     '[aria-label*="open intercom messenger" i]',
 
+    // BotLauncher / generic embedded chat widget
+    'section[aria-label*="chat widget" i]',
+    'button[data-test-id="BotLauncher"]',
+    '[data-test-id="BotLauncher"]',
+
     // Zendesk Messaging
     'iframe#launcher[title*="launch messaging" i]',
     'iframe#launcher[title*="messaging window" i]',
@@ -157,6 +162,12 @@
     "#message-bubble-div-v2",
     "#message-bubble-fas-toast-container",
     '[class*="grace-" i]',
+
+    // Paradox / recruiting chatbot-style widgets
+    '[aria-label*="AI Recruiter Conversation Widget" i]',
+    '[data-testid="widget_chatbox_popover"]',
+    '[class*="widget-chatbox" i]',
+    ".apply-messenger-launcher.el-popover__reference",
 
     // Common provider iframes
     'iframe[src*="freshchat" i]',
@@ -249,6 +260,23 @@
     "open messenger",
     "ch-front",
     "front chat",
+    "paradox",
+    "olivia",
+    "personal job search assistant",
+    "job search assistant",
+    "ai recruiter conversation widget",
+    "widget_chatbox_popover",
+    "widget-chatbox",
+    "job search assistant",
+    "personal job search assistant",
+    "apply-messenger-launcher",
+    "ai recruiter conversation widget",
+    "widget_chatbox_popover",
+    "widget-chatbox",
+    "job search assistant",
+    "personal job search assistant",
+    "chat widget",
+    "botlauncher",
   ];
 
   function getAllRoots(root = document) {
