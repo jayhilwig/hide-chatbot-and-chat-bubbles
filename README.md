@@ -33,17 +33,22 @@ This extension is for people who prefer a quieter web experience.
 
 This extension has been tested against common chatbot and support chat providers, including:
 
-- Intercom / Fin
-- Zendesk
-- Crisp
-- Tawk.to
-- Freshworks / Freshchat-style widgets
-- HubSpot
-- Gorgias
-- Kustomer
-- Zoho SalesIQ / ZSIQ
-- Qualified
-- NinjaOne / Qualified-style messenger widgets
+- LivePerson / LiveEngage
+- Front Chat
+- Tidio
+- LiveChat
+- Re:amaze
+- Chaty / Chaty.app / Chaty.ai
+- Joinchat
+- Olark
+- Help Scout
+- Lifelink chatbot
+- UJET
+- Vision Helpdesk
+- Grace / Healthcare Smart Assistant
+- Hyundai SmartChat
+- Paradox / recruiting chatbot-style widgets
+- BotLauncher-style embedded chat widgets
 
 It has also been tested across real-world SaaS, ecommerce, travel, food delivery, healthcare, and customer support websites.
 
@@ -57,18 +62,15 @@ This extension does not collect, sell, or share personal data.
 
 It does not require an account.
 
+It does not send browsing activity, page content, or preferences to any external server.
+
 Site preferences are stored using Chrome storage so the extension can remember whether blocking is enabled or disabled globally or for a specific site.
 
 ## Project status
 
-This project is currently private and under active development.
+This project is under active development.
 
-The extension is being tested against common chat widget providers and real-world websites before any broader release.
-
-## Notes
-
-<<<<<<< HEAD
-This project is not currently accepting external code contributions.
+The extension is being tested against common chat widget providers and real-world websites. It is intentionally conservative: it may miss some custom widgets in order to avoid hiding normal page content or important controls.
 
 ## Development
 
@@ -94,9 +96,6 @@ icon16.png
 icon32.png
 icon48.png
 icon128.png
-```
 
-=======
 This project is not affiliated with, endorsed by, or sponsored by any chatbot, support, ecommerce, travel, SaaS, or messaging provider mentioned in this README.
 
-> > > > > > > 76f73c68c112640f9956fa9a4357708e91a2e6f2
